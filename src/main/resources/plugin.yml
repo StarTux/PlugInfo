@@ -1,0 +1,33 @@
+main: com.cavetale.pluginfo.PlugInfoPlugin
+
+name: PlugInfo
+version: 0.1
+description: PlugInfo Plugin
+api-version: 1.17
+
+author: StarTux
+website: https://github.com/StarTux/PlugInfo
+
+depend: []
+softdepend: []
+
+commands:
+
+  pluginfo:
+    permission: pluginfo.pluginfo
+    aliases: [ plugininfo ]
+    usage: |-
+      /plugininfo list
+      /plugininfo dump <plugin>
+      /plugininfo depend <plugin>
+      /plugininfo author <name>
+      /plugininfo nauthor <name>
+      /plugininfo listen <event>
+      /plugininfo permission <permission>
+      /plugininfo command <cmd>
+
+permissions:
+
+  pluginfo.pluginfo:
+    description: Use /pluginfo
+    default: op
