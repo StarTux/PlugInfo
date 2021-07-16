@@ -2,7 +2,7 @@ main: com.cavetale.pluginfo.PlugInfoPlugin
 
 name: PlugInfo
 version: 0.1
-description: PlugInfo Plugin
+description: Plugin Information Lookup
 api-version: 1.17
 
 author: StarTux

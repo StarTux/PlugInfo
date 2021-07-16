@@ -19,4 +19,4 @@ Query information from the plugin description file.
 
 ## Permission
 
-- `pluginfo.pluginfo.
+- `pluginfo.pluginfo`
