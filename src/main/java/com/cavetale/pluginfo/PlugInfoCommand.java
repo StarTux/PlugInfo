@@ -1,10 +1,11 @@
 package com.cavetale.pluginfo;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -41,6 +42,7 @@ public final class PlugInfoCommand implements TabExecutor {
         registerCommand("permission", this::permission);
         registerCommand("command", this::command);
         registerCommand("reload", this::reload, this::completePlugins);
+        registerCommand("graph", this::graph);
         pluginfo.getCommand("pluginfo").setExecutor(this);
     }
 
@@ -132,7 +134,20 @@ public final class PlugInfoCommand implements TabExecutor {
 
     protected boolean depend(CommandSender sender, String[] args) {
         if (args.length != 1) return false;
-        return findDependencies(sender, args[0], false);
+        String arg = args[0];
+        Plugin plugin = Bukkit.getPluginManager().getPlugin(arg);
+        if (plugin == null) {
+            sender.sendMessage("Plugin not found: " + arg);
+            return true;
+        }
+        Map<String, Set<String>> dependedGraph = Util.buildDependedGraph();
+        Set<String> directlyDepending = new HashSet<>(dependedGraph.computeIfAbsent(arg, d -> new HashSet<>()));
+        List<String> dependencies = Util.findPluginDependencies(plugin.getName(), dependedGraph);
+        List<String> all = dependencies.subList(0, dependencies.size() - 1);
+        Collections.reverse(all);
+        sender.sendMessage(directlyDepending.size() + " directly depending: " + directlyDepending);
+        sender.sendMessage((dependencies.size() - 1) + " depending: " + all);
+        return true;
     }
 
     protected boolean author(CommandSender sender, String[] args) {
@@ -231,69 +246,47 @@ public final class PlugInfoCommand implements TabExecutor {
 
     protected boolean reload(CommandSender sender, String[] args) {
         if (args.length != 1) return false;
-        return findDependencies(sender, args[0], true);
-    }
-
-    protected boolean findDependencies(CommandSender sender, String arg, boolean doReload) {
+        String arg = args[0];
         Plugin plugin = Bukkit.getPluginManager().getPlugin(arg);
         if (plugin == null) {
             sender.sendMessage("Plugin not found: " + arg);
             return true;
         }
-        Map<String, Set<String>> dependedGraph = new HashMap<>();
-        for (Plugin it : Bukkit.getPluginManager().getPlugins()) {
-            for (String depend : it.getDescription().getDepend()) {
-                dependedGraph.computeIfAbsent(depend, d -> new HashSet<>()).add(it.getName());
-            }
-            for (String depend : it.getDescription().getSoftDepend()) {
-                dependedGraph.computeIfAbsent(depend, d -> new HashSet<>()).add(it.getName());
+        List<String> order = Util.findPluginDependencies(plugin.getName(), Util.buildDependedGraph());
+        sender.sendMessage("Plugin disable order: " + order);
+        for (String name : order) {
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "plugman unload " + name);
+        }
+        for (int i = order.size() - 1; i >= 0; i -= 1) {
+            String name = order.get(i);
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "plugman load " + name);
+        }
+        return true;
+    }
+
+    protected boolean graph(CommandSender sender, String[] args) {
+        if (args.length != 0) return false;
+        Map<String, Set<String>> dependedGraph = Util.buildDependedGraph();
+        List<String> lines = new ArrayList<>();
+        lines.add("digraph {");
+        List<String> names = new ArrayList<>(dependedGraph.keySet());
+        Collections.sort(names, (a, b) -> Integer.compare(dependedGraph.get(b).size(),
+                                                          dependedGraph.get(a).size()));
+        for (String name : names) {
+            for (String dependedBy : dependedGraph.get(name)) {
+                lines.add(dependedBy + " -> " + name);
             }
         }
-        Set<String> directlyDepending = new HashSet<>(dependedGraph.computeIfAbsent(arg, d -> new HashSet<>()));
-        Set<String> todo = new HashSet<>();
-        Set<String> done = new HashSet<>();
-        List<String> order = new ArrayList<>();
-        todo.add(plugin.getName());
-        done.add(plugin.getName());
-        while (!todo.isEmpty()) {
-            Set<String> next = new HashSet<>();
-            List<String> doRemove = new ArrayList<>();
-            List<String> doAdd = new ArrayList<>();
-            for (String it : todo) {
-                Set<String> dependedSet = dependedGraph.get(it);
-                if (dependedSet == null || dependedSet.isEmpty()) {
-                    order.add(it);
-                    doRemove.add(it);
-                } else {
-                    for (String depended : dependedSet) {
-                        if (!done.contains(depended)) {
-                            done.add(depended);
-                            doAdd.add(depended);
-                        }
-                    }
-                }
-            }
-            for (Set<String> depended : dependedGraph.values()) {
-                depended.removeAll(doRemove);
-            }
-            todo.removeAll(doRemove);
-            todo.addAll(doAdd);
+        lines.add("}");
+        String fn = "PlugInfoGraph.txt";
+        try (PrintWriter out = new PrintWriter(fn)) {
+            out.print(String.join("\n", lines));
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+            sender.sendMessage("IOException! See console");
+            return true;
         }
-        if (!doReload) {
-            List<String> all = order.subList(0, order.size() - 1);
-            Collections.reverse(all);
-            sender.sendMessage(directlyDepending.size() + " directly depending: " + directlyDepending);
-            sender.sendMessage((order.size() - 1) + " depending: " + all);
-        } else {
-            sender.sendMessage("Plugin disable order: " + order);
-            for (String name : order) {
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "plugman unload " + name);
-            }
-            for (int i = order.size() - 1; i >= 0; i -= 1) {
-                String name = order.get(i);
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "plugman load " + name);
-            }
-        }
+        sender.sendMessage("Graph written to " + fn);
         return true;
     }
 }

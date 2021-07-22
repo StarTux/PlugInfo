@@ -25,6 +25,7 @@ commands:
       /plugininfo listen <event>
       /plugininfo permission <permission>
       /plugininfo command <cmd>
+      /pluginfo graph
 
 permissions:
 
