@@ -12,14 +12,16 @@ import org.bukkit.plugin.Plugin;
 public final class Util {
     private Util() { }
 
-    public static Map<String, Set<String>> buildDependedGraph() {
+    public static Map<String, Set<String>> buildDependedGraph(boolean withSoftDepend) {
         Map<String, Set<String>> dependedGraph = new HashMap<>();
         for (Plugin it : Bukkit.getPluginManager().getPlugins()) {
             for (String depend : it.getDescription().getDepend()) {
                 dependedGraph.computeIfAbsent(depend, d -> new HashSet<>()).add(it.getName());
             }
-            for (String depend : it.getDescription().getSoftDepend()) {
-                dependedGraph.computeIfAbsent(depend, d -> new HashSet<>()).add(it.getName());
+            if (withSoftDepend) {
+                for (String depend : it.getDescription().getSoftDepend()) {
+                    dependedGraph.computeIfAbsent(depend, d -> new HashSet<>()).add(it.getName());
+                }
             }
         }
         return dependedGraph;

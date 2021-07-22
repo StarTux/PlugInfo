@@ -140,7 +140,7 @@ public final class PlugInfoCommand implements TabExecutor {
             sender.sendMessage("Plugin not found: " + arg);
             return true;
         }
-        Map<String, Set<String>> dependedGraph = Util.buildDependedGraph();
+        Map<String, Set<String>> dependedGraph = Util.buildDependedGraph(true);
         Set<String> directlyDepending = new HashSet<>(dependedGraph.computeIfAbsent(arg, d -> new HashSet<>()));
         List<String> dependencies = Util.findPluginDependencies(plugin.getName(), dependedGraph);
         List<String> all = dependencies.subList(0, dependencies.size() - 1);
@@ -252,7 +252,7 @@ public final class PlugInfoCommand implements TabExecutor {
             sender.sendMessage("Plugin not found: " + arg);
             return true;
         }
-        List<String> order = Util.findPluginDependencies(plugin.getName(), Util.buildDependedGraph());
+        List<String> order = Util.findPluginDependencies(plugin.getName(), Util.buildDependedGraph(true));
         sender.sendMessage("Plugin disable order: " + order);
         for (String name : order) {
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "plugman unload " + name);
@@ -266,7 +266,7 @@ public final class PlugInfoCommand implements TabExecutor {
 
     protected boolean graph(CommandSender sender, String[] args) {
         if (args.length != 0) return false;
-        Map<String, Set<String>> dependedGraph = Util.buildDependedGraph();
+        Map<String, Set<String>> dependedGraph = Util.buildDependedGraph(false);
         List<String> lines = new ArrayList<>();
         lines.add("digraph {");
         List<String> names = new ArrayList<>(dependedGraph.keySet());
