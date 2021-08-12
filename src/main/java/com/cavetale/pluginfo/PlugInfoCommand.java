@@ -194,7 +194,7 @@ public final class PlugInfoCommand implements TabExecutor {
             sender.sendMessage("Event class not found: " + arg + ". See console.");
             return true;
         }
-        sender.sendMessage("Plugins not being listening to " + arg + ":");
+        sender.sendMessage("Plugins listening to " + arg + ":");
         int count = 0;
         for (RegisteredListener listener: handlers.getRegisteredListeners()) {
             sender.sendMessage("- " + listener.getPlugin().getName() + " (" + listener.getPriority() + ")");
