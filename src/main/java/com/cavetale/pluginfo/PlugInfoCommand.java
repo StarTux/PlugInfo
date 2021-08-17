@@ -43,6 +43,7 @@ public final class PlugInfoCommand implements TabExecutor {
         registerCommand("command", this::command);
         registerCommand("reload", this::reload, this::completePlugins);
         registerCommand("graph", this::graph);
+        registerCommand("synccommands", this::syncCommands);
         pluginfo.getCommand("pluginfo").setExecutor(this);
     }
 
@@ -261,6 +262,7 @@ public final class PlugInfoCommand implements TabExecutor {
             String name = order.get(i);
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "plugman load " + name);
         }
+        syncCommands();
         return true;
     }
 
@@ -288,5 +290,20 @@ public final class PlugInfoCommand implements TabExecutor {
         }
         sender.sendMessage("Graph written to " + fn);
         return true;
+    }
+
+    protected boolean syncCommands(CommandSender sender, String[] args) {
+        if (args.length != 0) return false;
+        syncCommands();
+        sender.sendMessage("Commands synchronized");
+        return true;
+    }
+
+    private static void syncCommands() {
+        try {
+            Bukkit.getServer().getClass().getMethod("syncCommands").invoke(Bukkit.getServer());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
