@@ -44,6 +44,7 @@ public final class PlugInfoCommand implements TabExecutor {
         registerCommand("reload", this::reload, this::completePlugins);
         registerCommand("graph", this::graph);
         registerCommand("synccommands", this::syncCommands);
+        registerCommand("api", this::api);
         pluginfo.getCommand("pluginfo").setExecutor(this);
     }
 
@@ -305,5 +306,18 @@ public final class PlugInfoCommand implements TabExecutor {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private boolean api(CommandSender sender, String[] args) {
+        int count = 0;
+        for (Plugin plugin: Bukkit.getServer().getPluginManager().getPlugins()) {
+            String apiVersion = plugin.getDescription().getAPIVersion();
+            if (!"1.17".equals(apiVersion)) {
+                sender.sendMessage("- " + plugin.getName() + ": " + apiVersion);
+                count += 1;
+            }
+        }
+        sender.sendMessage("Total " + count);
+        return true;
     }
 }
