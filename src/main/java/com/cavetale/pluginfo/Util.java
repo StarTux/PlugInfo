@@ -65,6 +65,7 @@ public final class Util {
             }
             todo.removeAll(doRemove);
             todo.addAll(doAdd);
+            if (doAdd.isEmpty() && doRemove.isEmpty()) break;
         }
         return order;
     }

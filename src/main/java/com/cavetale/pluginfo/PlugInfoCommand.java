@@ -240,7 +240,6 @@ public final class PlugInfoCommand implements TabExecutor {
         sender.sendMessage("Description: " + pcmd.getDescription());
         sender.sendMessage("Label: " + pcmd.getLabel());
         sender.sendMessage("Permission: " + pcmd.getPermission());
-        sender.sendMessage("PermissionMessage: " + pcmd.getPermissionMessage());
         sender.sendMessage("Usage: " + pcmd.getUsage());
         sender.sendMessage("Registered: " + pcmd.isRegistered());
         return true;
