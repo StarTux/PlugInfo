@@ -33,36 +33,36 @@ public final class PlugInfoCommand implements TabExecutor {
     private Map<String, Subcommand> commandMap = new LinkedHashMap<>();
 
     public void enable() {
-        registerCommand("list", this::list);
-        registerCommand("dump", this::dump, this::completePlugins);
-        registerCommand("depend", this::depend, this::completePlugins);
-        registerCommand("author", this::author);
-        registerCommand("nauthor", this::nauthor);
-        registerCommand("listen", this::listen);
-        registerCommand("permission", this::permission);
-        registerCommand("command", this::command);
-        registerCommand("reload", this::reload, this::completePlugins);
-        registerCommand("unload", this::unload, this::completePlugins);
-        registerCommand("graph", this::graph);
-        registerCommand("synccommands", this::syncCommands);
-        registerCommand("api", this::api);
+        registerCommand("list", this::list, List.of());
+        registerCommand("dump", this::dump, List.of(this::completePlugins));
+        registerCommand("depend", this::depend, List.of(this::completePlugins));
+        registerCommand("author", this::author, List.of());
+        registerCommand("nauthor", this::nauthor, List.of());
+        registerCommand("listen", this::listen, List.of());
+        registerCommand("permission", this::permission, List.of());
+        registerCommand("command", this::command, List.of());
+        registerCommand("reload", this::reload, List.of(this::completePlugins));
+        registerCommand("unload", this::unload, List.of(this::completePlugins));
+        registerCommand("graph", this::graph, List.of());
+        registerCommand("synccommands", this::syncCommands, List.of());
+        registerCommand("api", this::api, List.of());
         pluginfo.getCommand("pluginfo").setExecutor(this);
     }
 
     @RequiredArgsConstructor
     private static final class Subcommand {
         protected final BiFunction<CommandSender, String[], Boolean> call;
-        protected final Function<String, List<String>>[] completers;
+        protected final List<Function<String, List<String>>> completers;
     }
 
-    private void registerCommand(final String name,
-                                 final BiFunction<CommandSender, String[], Boolean> call,
-                                 final Function<String, List<String>>... completers) {
+    private void registerCommand(String name,
+                                 BiFunction<CommandSender, String[], Boolean> call,
+                                 List<Function<String, List<String>>> completers) {
         commandMap.put(name, new Subcommand(call, completers));
     }
 
     @Override
-    public boolean onCommand(final CommandSender sender, final Command command, final String alias, final String[] args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 0) return false;
         String cmd = args[0].toLowerCase();
         Subcommand subcommand = commandMap.get(cmd);
@@ -71,7 +71,7 @@ public final class PlugInfoCommand implements TabExecutor {
     }
 
     @Override
-    public List<String> onTabComplete(final CommandSender sender, final Command command, final String alias, final String[] args) {
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1) {
             String arg = args[0];
             return commandMap.keySet().stream()
@@ -81,8 +81,8 @@ public final class PlugInfoCommand implements TabExecutor {
             Subcommand subcommand = commandMap.get(args[0]);
             if (subcommand == null) return Collections.emptyList();
             int argIndex = args.length - 2;
-            if (argIndex >= subcommand.completers.length) return Collections.emptyList();
-            return subcommand.completers[argIndex].apply(args[args.length - 1]);
+            if (argIndex >= subcommand.completers.size()) return Collections.emptyList();
+            return subcommand.completers.get(argIndex).apply(args[args.length - 1]);
         }
         return null;
     }
