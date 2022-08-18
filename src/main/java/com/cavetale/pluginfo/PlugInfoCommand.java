@@ -329,7 +329,7 @@ public final class PlugInfoCommand implements TabExecutor {
         int count = 0;
         for (Plugin plugin: Bukkit.getServer().getPluginManager().getPlugins()) {
             String apiVersion = plugin.getDescription().getAPIVersion();
-            if (!"1.17".equals(apiVersion)) {
+            if (!"1.19".equals(apiVersion)) {
                 sender.sendMessage("- " + plugin.getName() + ": " + apiVersion);
                 count += 1;
             }

@@ -3,7 +3,7 @@ main: com.cavetale.pluginfo.PlugInfoPlugin
 name: PlugInfo
 version: 0.1
 description: Plugin Information Lookup
-api-version: 1.17
+api-version: 1.19
 
 author: StarTux
 website: https://github.com/StarTux/PlugInfo
@@ -15,16 +15,18 @@ commands:
 
   pluginfo:
     permission: pluginfo.pluginfo
-    aliases: [ plugininfo ]
+    aliases: [pluginfo]
     usage: |-
-      /plugininfo list
-      /plugininfo dump <plugin>
-      /plugininfo depend <plugin>
-      /plugininfo author <name>
-      /plugininfo nauthor <name>
-      /plugininfo listen <event>
-      /plugininfo permission <permission>
-      /plugininfo command <cmd>
+      /pluginfo list
+      /pluginfo dump <plugin>
+      /pluginfo depend <plugin>
+      /pluginfo author <name>
+      /pluginfo nauthor <name>
+      /pluginfo listen <event>
+      /pluginfo permission <permission>
+      /pluginfo command <cmd>
+      /pluginfo reload <plugin>
+      /pluginfo unload <plugin>
       /pluginfo graph
 
 permissions:
