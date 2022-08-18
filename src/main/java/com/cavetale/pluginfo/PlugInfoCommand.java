@@ -42,6 +42,7 @@ public final class PlugInfoCommand implements TabExecutor {
         registerCommand("permission", this::permission);
         registerCommand("command", this::command);
         registerCommand("reload", this::reload, this::completePlugins);
+        registerCommand("unload", this::unload, this::completePlugins);
         registerCommand("graph", this::graph);
         registerCommand("synccommands", this::syncCommands);
         registerCommand("api", this::api);
@@ -261,6 +262,23 @@ public final class PlugInfoCommand implements TabExecutor {
         for (int i = order.size() - 1; i >= 0; i -= 1) {
             String name = order.get(i);
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "plugman load " + name);
+        }
+        syncCommands();
+        return true;
+    }
+
+    protected boolean unload(CommandSender sender, String[] args) {
+        if (args.length != 1) return false;
+        String arg = args[0];
+        Plugin plugin = Bukkit.getPluginManager().getPlugin(arg);
+        if (plugin == null) {
+            sender.sendMessage("Plugin not found: " + arg);
+            return true;
+        }
+        List<String> order = Util.findPluginDependencies(plugin.getName(), Util.buildDependedGraph(true));
+        sender.sendMessage("Plugin disable order: " + order);
+        for (String name : order) {
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "plugman unload " + name);
         }
         syncCommands();
         return true;
